@@ -13,15 +13,14 @@ function generateTokenId(label: string): string {
 }
 
 ponder.on("EthRegistry:TransferSingle", async ({ event, context }) => {
-    
+
     console.log("EthRegistry:TransferSingle", event.transaction.hash, event.args);
-    const timestamp:Date = new Date(Number(event.block.timestamp) * 1000);
-    console.log("EthRegistry:TransferSingle2", timestamp);
+    const timestamp = event.block.timestamp
     await context.db.insert(domain).values({
       id: event.args.id.toString(),
       owner: event.args.to.toString(),
-    //   createdAt: timestamp,
-    //   updatedAt: timestamp,
+      createdAt: timestamp,
+      updatedAt: timestamp
     });
 });
 
@@ -36,7 +35,8 @@ ponder.on("EthRegistry:NewSubname", async ({ event, context }) => {
         // Update the record with new data
         const newRecord = {
             ...record,
-            label: event.args.label
+            label: event.args.label,
+            updatedAt: event.block.timestamp
         };
         console.log("EthRegistry:NewSubname5", newRecord);
         await context.db

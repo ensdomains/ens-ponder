@@ -4,6 +4,7 @@ export const domain = onchainTable("domain", (t) => ({
   id: t.text().primaryKey(),
   label: t.text(),
   owner: t.text(),
-  createdAt: t.timestamp(),
-  updatedAt: t.timestamp(),
+  createdAt: t.bigint("createdAt").notNull(),
+  updatedAt: t.bigint("updatedAt").notNull(),
 }));
+
