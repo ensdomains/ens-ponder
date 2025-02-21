@@ -1,6 +1,9 @@
 import { onchainTable } from "ponder";
 
-export const example = onchainTable("example", (t) => ({
+export const domain = onchainTable("domain", (t) => ({
   id: t.text().primaryKey(),
-  name: t.text(),
+  label: t.text(),
+  owner: t.text(),
+  createdAt: t.timestamp(),
+  updatedAt: t.timestamp(),
 }));

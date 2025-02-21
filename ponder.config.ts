@@ -1,7 +1,7 @@
 import { createConfig } from "ponder";
 import { http } from "viem";
 
-import { UnverifiedContractAbi } from "./abis/UnverifiedContractAbi";
+import { ETHRegistryAbi } from "./abis/ETHRegistryAbi";
 
 export default createConfig({
   networks: {
@@ -11,10 +11,11 @@ export default createConfig({
     },
   },
   contracts: {
-    UnverifiedContract: {
-      abi: UnverifiedContractAbi,
-      address: "0xdbbc2c0fe2a1d0fb4056b35a22e543beb715e7fc",
+    EthRegistry: {
+      abi: ETHRegistryAbi,
+      address: "0xFd8562F0B884b5f8d137ff50D25fc26b34868172",
       network: "sepolia",
+      startBlock: 7699319,
     },
   },
 });
