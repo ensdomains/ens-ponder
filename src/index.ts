@@ -28,18 +28,19 @@ ponder.on("RegistryDatastore:SubregistryUpdate", async ({ event, context }) => {
 });
 
 ponder.on("EthRegistry:TransferSingle", async ({ event, context }) => {
-    console.log("EthRegistry:TransferSingle", event.transaction.hash, event.args);
+    console.log("EthRegistry:TransferSingle", event.transaction.to);
     const timestamp = event.block.timestamp
     await context.db.insert(domain).values({
       id: event.args.id.toString(),
       owner: event.args.to.toString(),
+      registry: event.transaction.to?.toString(),
       createdAt: timestamp,
       updatedAt: timestamp
     });
 });
 
 ponder.on("EthRegistry:NewSubname", async ({ event, context }) => {
-    console.log("EthRegistry:NewSubname", event.transaction.hash, event.args);
+    console.log("EthRegistry:NewSubname", event.transaction.to);
     const tokenId = generateTokenId(event.args.label);
     
     const LABEL_HASH_MASK = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000n;
@@ -83,14 +84,17 @@ ponder.on("EthRegistry:NewSubname", async ({ event, context }) => {
 });
 
 ponder.on("RootRegistry:TransferSingle", async ({ event, context }) => {
-    console.log("RootRegistry:TransferSingle", event.transaction.to);
-    const timestamp = event.block.timestamp
-    await context.db.insert(domain).values({
-      id: event.args.id.toString(),
-      owner: event.args.to.toString(),
-      createdAt: timestamp,
-      updatedAt: timestamp
-    });
+    
+    const timestamp = event.block.timestamp;
+    const values = {
+        id: event.args.id.toString(),
+        owner: event.args.to.toString(),
+        registry: event.transaction.to?.toString(),
+        createdAt: timestamp,
+        updatedAt: timestamp
+      }
+      console.log("RootRegistry:TransferSingle", values);
+    await context.db.insert(domain).values(values);
 });
 
 ponder.on("RootRegistry:NewSubname", async ({ event, context }) => {
