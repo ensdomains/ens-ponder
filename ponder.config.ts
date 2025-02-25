@@ -3,6 +3,7 @@ import { http } from "viem";
 
 import { ETHRegistryAbi } from "./abis/ETHRegistryAbi";
 import { RegistryDatastoreAbi } from "./abis/RegistryDatastoreAbi";
+import { RootRegistryAbi } from "./abis/RootRegistryAbi";
 export default createConfig({
   networks: {
     sepolia: {
@@ -20,6 +21,12 @@ export default createConfig({
     RegistryDatastore: {
       abi: RegistryDatastoreAbi,
       address: "0x73308B430b61958e3d8C4a6db08153372d5eb125",
+      network: "sepolia",
+      startBlock: 7699319,
+    },
+    RootRegistry: {
+      abi: RootRegistryAbi,
+      address: "0xc44D7201065190B290Aaaf6efaDFD49d530547A3",
       network: "sepolia",
       startBlock: 7699319,
     },
