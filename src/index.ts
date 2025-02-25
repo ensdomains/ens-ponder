@@ -30,8 +30,11 @@ ponder.on("RegistryDatastore:SubregistryUpdate", async ({ event, context }) => {
 ponder.on("EthRegistry:TransferSingle", async ({ event, context }) => {
     console.log("EthRegistry:TransferSingle", event.transaction.to);
     const timestamp = event.block.timestamp
+    const labelHash = event.args.id.toString()
+    const domainId = event.transaction.to + '-' + labelHash
     await context.db.insert(domain).values({
-      id: event.args.id.toString(),
+      id: domainId,
+      labelHash: labelHash,
       owner: event.args.to.toString(),
       registry: event.transaction.to?.toString(),
       createdAt: timestamp,
@@ -42,11 +45,14 @@ ponder.on("EthRegistry:TransferSingle", async ({ event, context }) => {
 ponder.on("EthRegistry:NewSubname", async ({ event, context }) => {
     console.log("EthRegistry:NewSubname", event.transaction.to);
     const tokenId = generateTokenId(event.args.label);
+    const registryId = event.transaction.to?.toString()
     
     const LABEL_HASH_MASK = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000n;
+    const domainId = registryId + '-' + tokenId
     const labelHash = BigInt(tokenId) & LABEL_HASH_MASK;
+
     console.log("EthRegistry:NewSubname2", tokenId, labelHash);
-    const record = await context.db.find(domain, { id: tokenId });
+    const record = await context.db.find(domain, { id: domainId });
     if (record) {
         console.log("EthRegistry:NewSubname3", record);
 
@@ -59,22 +65,20 @@ ponder.on("EthRegistry:NewSubname", async ({ event, context }) => {
             await context.db
                 .update(registryDatabase, {id:record2.id})
                 .set({...record2, label: event.args.label})
-
         } else {
             console.log("RegistryDatastore:SubregistryUpdate", "No record found");
         }
-    
-
 
         // Update the record with new data
         const newRecord = {
             ...record,
             label: event.args.label,
+            labelHash: tokenId,
             updatedAt: event.block.timestamp
         };
         console.log("EthRegistry:NewSubname5", newRecord);
         await context.db
-            .update(domain, {id:tokenId})
+            .update(domain, {id:domainId})
             .set(newRecord)
 
         console.log("EthRegistry:NewSubname5", "Updated record");
@@ -84,27 +88,31 @@ ponder.on("EthRegistry:NewSubname", async ({ event, context }) => {
 });
 
 ponder.on("RootRegistry:TransferSingle", async ({ event, context }) => {
-    
     const timestamp = event.block.timestamp;
+    const tokenId = event.args.id.toString()
+    const registryId = event.transaction.to?.toString()
+    const domainId = registryId + '-' + tokenId
     const values = {
-        id: event.args.id.toString(),
+        id: domainId,
+        labelHash: tokenId,
         owner: event.args.to.toString(),
-        registry: event.transaction.to?.toString(),
+        registry: registryId,
         createdAt: timestamp,
         updatedAt: timestamp
-      }
-      console.log("RootRegistry:TransferSingle", values);
+    }
+    console.log("RootRegistry:TransferSingle", values);
     await context.db.insert(domain).values(values);
 });
 
 ponder.on("RootRegistry:NewSubname", async ({ event, context }) => {
     console.log("RootRegistry:NewSubname", event.transaction.to);
     const tokenId = generateTokenId(event.args.label);
-    
+    const registryId = event.transaction.to?.toString()
+    const domainId = registryId + '-' + tokenId
     const LABEL_HASH_MASK = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000n;
     const labelHash = BigInt(tokenId) & LABEL_HASH_MASK;
     console.log("RootRegistry:NewSubname2", tokenId, labelHash);
-    const record = await context.db.find(domain, { id: tokenId });
+    const record = await context.db.find(domain, { id: domainId });
     if (record) {
         console.log("RootRegistry:NewSubname3", record);
 
@@ -125,11 +133,12 @@ ponder.on("RootRegistry:NewSubname", async ({ event, context }) => {
         const newRecord = {
             ...record,
             label: event.args.label,
+            labelHash: tokenId,
             updatedAt: event.block.timestamp
         };
         console.log("RootRegistry:NewSubname5", newRecord);
         await context.db
-            .update(domain, {id:tokenId})
+            .update(domain, {id:domainId})
             .set(newRecord)
 
         console.log("RootRegistry:NewSubname5", "Updated record");
