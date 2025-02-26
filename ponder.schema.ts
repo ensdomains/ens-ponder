@@ -22,6 +22,7 @@ export const registryDatabase = onchainTable("registryDatabase", (t) => ({
   labelHash: t.text(),
   label: t.text(),
   subregistry: t.text(),
+  resolver: t.text(),
   flags: t.bigint(),
   createdAt: t.bigint("createdAt").notNull(),
   updatedAt: t.bigint("updatedAt").notNull(),
@@ -31,5 +32,20 @@ export const registryDatabaseRelations = relations(registryDatabase, ({ one }) =
   registry: one(registryDatabase, {
     fields: [registryDatabase.subregistry],
     references: [registryDatabase.id],
+  }),
+}));
+
+export const ownedResolver = onchainTable("ownedResolver", (t) => ({
+  id: t.text().primaryKey(),
+  address: t.text(),
+  node: t.text(),
+  createdAt: t.bigint("createdAt").notNull(),
+  updatedAt: t.bigint("updatedAt").notNull(),
+}));
+
+export const registryDatabaseResolverRelations = relations(registryDatabase, ({ one }) => ({
+  resolver: one(ownedResolver, {
+    fields: [registryDatabase.resolver],
+    references: [ownedResolver.id],
   }),
 }));

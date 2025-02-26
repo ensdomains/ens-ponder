@@ -1,6 +1,7 @@
 import { createConfig } from "ponder";
 import { http } from "viem";
-
+import { parseAbiItem } from "viem";
+import { OwnedResolverAbi } from "./abis/OwnedResolverAbi";
 import { ETHRegistryAbi } from "./abis/ETHRegistryAbi";
 import { RegistryDatastoreAbi } from "./abis/RegistryDatastoreAbi";
 import { RootRegistryAbi } from "./abis/RootRegistryAbi";
@@ -29,6 +30,16 @@ export default createConfig({
       address: "0xc44D7201065190B290Aaaf6efaDFD49d530547A3",
       network: "sepolia",
       startBlock: 7699319,
+    },
+    OwnedResolver: {
+      abi: OwnedResolverAbi,
+      network: "sepolia",
+      startBlock: 7699319,
+      factory: {
+        address: "0x33d438bb85B76C9211c4F259109D94Fe83F5A5eC",
+        event: parseAbiItem("event ProxyDeployed(address indexed sender, address indexed proxyAddress, uint256 salt, address implementation)"),
+        parameter: "proxyAddress",
+      },
     },
   },
 });

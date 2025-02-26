@@ -1,5 +1,5 @@
 import { ponder } from "ponder:registry";
-import { domain, registryDatabase, rootRegistry } from "ponder:schema";
+import { domain, ownedResolver, registryDatabase } from "ponder:schema";
 import { ethers, id } from "ethers";
 import { db } from "ponder:api";
 import { eq } from "ponder";
@@ -25,6 +25,33 @@ ponder.on("RegistryDatastore:SubregistryUpdate", async ({ event, context }) => {
       createdAt: timestamp,
       updatedAt: timestamp
     });
+});
+
+ponder.on("RegistryDatastore:ResolverUpdate", async ({ event, context }) => {
+    console.log("RegistryDatastore:ResolverUpdate", event.args);
+    const timestamp = event.block.timestamp
+    const record2 = await context.db.find(registryDatabase, {id: event.args.registry.toString()});
+    if (record2) {
+        console.log("RegistryDatastore:ResolverUpdate", "Record found", record2);
+        await context.db
+        .update(registryDatabase, {id:record2.id})
+        .set({...record2, resolver: event.args.resolver.toString()})
+
+        const record3 = await context.db.find(ownedResolver, {id: event.args.resolver.toString()});
+        if (record3) {
+            console.log("RegistryDatastore:ResolverUpdate", "Record found", record3);
+        } else {
+            console.log("RegistryDatastore:ResolverUpdate", "No record found, creating new record");
+            await context.db.insert(ownedResolver).values({
+                id: event.args.resolver.toString(),
+                createdAt: timestamp,
+                updatedAt: timestamp
+            });
+        }
+
+    } else {
+        console.log("RegistryDatastore:ResolverUpdate", "No record found");
+    }
 });
 
 ponder.on("EthRegistry:TransferSingle", async ({ event, context }) => {
@@ -144,5 +171,25 @@ ponder.on("RootRegistry:NewSubname", async ({ event, context }) => {
         console.log("RootRegistry:NewSubname5", "Updated record");
     } else {
         console.log("RootRegistry:NewSubname4", "No record found");
+    }
+});
+
+ponder.on("OwnedResolver:AddressChanged", async ({ event, context }) => {
+    const timestamp = event.block.timestamp
+    const resolverId = event.transaction.to?.toString()
+    console.log("OwnedResolver:AddressChanged", event.args, resolverId);
+    const record = await context.db.find(ownedResolver, {id: resolverId});
+    if (record) {
+        console.log("OwnedResolver:AddressChanged", "Record found", record);
+        await context.db
+            .update(ownedResolver, {id:record.id})
+            .set({
+                ...record,
+                address: event.args.newAddress.toString(),
+                updatedAt: timestamp,
+                node: event.args.node.toString()
+            })
+    } else {
+        console.log("OwnedResolver:AddressChanged", "No record found");
     }
 });
