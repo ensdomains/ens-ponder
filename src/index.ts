@@ -20,7 +20,7 @@ ponder.on("RegistryDatastore:SubregistryUpdate", async ({ event, context }) => {
     await context.db.insert(registryDatabase).values({
       id: event.args.registry.toString(),
       labelHash: event.args.labelHash.toString(),
-      subregistry: event.args.subregistry,
+      subregistryId: event.args.subregistry,
       flags: event.args.flags,
       createdAt: timestamp,
       updatedAt: timestamp

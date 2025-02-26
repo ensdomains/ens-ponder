@@ -21,7 +21,7 @@ export const registryDatabase = onchainTable("registryDatabase", (t) => ({
   id: t.text().primaryKey(),
   labelHash: t.text(),
   label: t.text(),
-  subregistry: t.text(),
+  subregistryId: t.text(),
   resolver: t.text(),
   flags: t.bigint(),
   createdAt: t.bigint("createdAt").notNull(),
@@ -29,8 +29,8 @@ export const registryDatabase = onchainTable("registryDatabase", (t) => ({
 }));
 
 export const registryDatabaseRelations = relations(registryDatabase, ({ one }) => ({
-  registry: one(registryDatabase, {
-    fields: [registryDatabase.subregistry],
+  subregistry: one(registryDatabase, {
+    fields: [registryDatabase.subregistryId],
     references: [registryDatabase.id],
   }),
 }));
