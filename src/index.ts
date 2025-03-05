@@ -52,24 +52,44 @@ async function updateDomainLabel(context: any, domainId: string, label: string, 
     }
     let name = label;
     if (source != "RootRegistry") {
-        const parentRegistryRecord = await context.db.sql.query
-            .registryDatabase
-            .findFirst({where: eq(registryDatabase.subregistryId, registryRecord.id)});
-    
-        if (parentRegistryRecord) {
-            console.log("Parent registry record found:", parentRegistryRecord);
-            let parentDomainRecord = await context.db.sql.query.domain.findFirst({where: eq(domain.registry, parentRegistryRecord.id)});
-            if (parentDomainRecord) {
-                console.log("Parent domain record found:", parentDomainRecord);
-                const parentLabel = parentDomainRecord.label;
-                name = name + "." + parentLabel;
-                console.log("New name:", name);
+        let currentRegistryId = registryRecord.id;
+        let currentName = name;
+
+        while (true) {
+            const parentRegistryRecord = await context.db.sql.query
+                .registryDatabase
+                .findFirst({where: eq(registryDatabase.subregistryId, currentRegistryId)});
+
+            if (!parentRegistryRecord) {
+                break; // We've reached the top level
             }
+
+            console.log("Parent registry record found:", parentRegistryRecord);
+            let parentDomainRecord = await context.db.sql.query.domain.findFirst({
+                where: eq(domain.registry, parentRegistryRecord.id)
+            });
+
+            if (!parentDomainRecord) {
+                break;
+            }
+
+            console.log("Parent domain record found:", parentDomainRecord);
+            
+            if (parentDomainRecord.isTld) {
+                currentName = currentName + "." + parentDomainRecord.label;
+                console.log("Reached TLD. Final name:", currentName);
+                break;
+            }
+
+            currentName = currentName + "." + parentDomainRecord.label;
+            currentRegistryId = parentRegistryRecord.id;
+            console.log("Current name:", currentName);
         }
+
+        name = currentName;
     }
     // Update the domain record
     const nameArray = [name];
-    const serializedName = JSON.stringify(nameArray);
     const newDomainRecord = {
         ...domainRecord,
         label: label,
