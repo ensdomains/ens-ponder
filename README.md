@@ -16,6 +16,94 @@ This is a Ponder project for the ENS. It is a simple inder that stores the ENS r
    - `registryDatabase.resolver` references `ownedResolver.id`
    - Each registry entry can have an associated resolver
 
+## Schema
+
+```mermaid
+erDiagram
+    domain {
+        string id PK
+        string label
+        string[] name
+        string labelHash
+        string owner
+        string registry FK
+        boolean isTld
+        bigint createdAt
+        bigint updatedAt
+    }
+
+    registryDatabase {
+        string id PK
+        string labelHash
+        string label
+        string subregistryId FK
+        string resolver FK
+        bigint flags
+        bigint createdAt
+        bigint updatedAt
+    }
+
+    subregistryUpdateEvent {
+        string id PK
+        string registryId FK
+        string labelHash
+        string subregistryId
+        bigint flags
+        bigint createdAt
+        bigint updatedAt
+    }
+
+    resolverUpdateEvent {
+        string id PK
+        string registryId FK
+        string labelHash
+        string resolverId
+        bigint flags
+        bigint createdAt
+        bigint updatedAt
+    }
+
+    newSubnameEvent {
+        string id PK
+        string registryId FK
+        string label
+        string labelHash
+        string source
+        bigint createdAt
+        bigint updatedAt
+    }
+
+    ownedResolver {
+        string id PK
+        string address
+        string node
+        bigint createdAt
+        bigint updatedAt
+    }
+
+    transferSingleEvent {
+        string id PK
+        string registryId FK
+        string tokenId
+        string from
+        string to
+        bigint value
+        string source
+        bigint createdAt
+        bigint updatedAt
+    }
+
+    domain ||--|{ registryDatabase : "registry"
+    registryDatabase ||--|{ registryDatabase : "subregistry"
+    registryDatabase ||--|{ ownedResolver : "resolver"
+    subregistryUpdateEvent }|--|| registryDatabase : "registry"
+    resolverUpdateEvent }|--|| registryDatabase : "registry"
+    newSubnameEvent }|--|| registryDatabase : "registry"
+    transferSingleEvent }|--|| registryDatabase : "registry"
+
+
+```
+
 ## Events
 
 ### Registry Events
