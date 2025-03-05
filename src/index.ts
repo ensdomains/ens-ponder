@@ -30,30 +30,30 @@ function createDomainId(registryId: string | undefined, tokenId: string): string
 }
 
 async function updateDomainLabel(context: any, domainId: string, label: string, tokenId: string, timestamp: bigint, event: any, source: string) {
-    const record = await context.db.find(domain, { id: domainId });
-    if (!record) {
+    const domainRecord = await context.db.find(domain, { id: domainId });
+    if (!domainRecord) {
         console.log("Domain not found:", domainId);
         return;
     }
     
-    console.log("Updating domain label:", record);
+    console.log("Updating domain label:", domainRecord);
     
     // Update registry database if exists
     const labelHash = BigInt(tokenId) & LABEL_HASH_MASK;
-    const record2 = await context.db.sql.query
+    const registryRecord = await context.db.sql.query
         .registryDatabase
         .findFirst({where: eq(registryDatabase.labelHash, labelHash.toString())});
 
-    if (record2) {
-        console.log("Registry record found:", record2);
+    if (registryRecord) {
+        console.log("Registry record found:", registryRecord);
         await context.db
-            .update(registryDatabase, {id:record2.id})
-            .set({...record2, label: label});
+            .update(registryDatabase, {id:registryRecord.id})
+            .set({...registryRecord, label: label});
     }
 
     // Update the domain record
-    const newRecord = {
-        ...record,
+    const newDomainRecord = {
+        ...domainRecord,
         label: label,
         labelHash: tokenId,
         isTld: source === "RootRegistry" ? true : false,
@@ -62,13 +62,13 @@ async function updateDomainLabel(context: any, domainId: string, label: string, 
     
     await context.db
         .update(domain, {id: domainId})
-        .set(newRecord);
-    
+        .set(newDomainRecord);
+
     // Store the event data
     const eventId = createEventID(event);
     await context.db.insert(newSubnameEvent).values({
         id: eventId,
-        registryId: record.registry,
+        registryId: domainRecord.registry,
         label: label,
         labelHash: tokenId,
         source: source,
