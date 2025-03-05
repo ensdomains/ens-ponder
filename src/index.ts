@@ -50,11 +50,28 @@ async function updateDomainLabel(context: any, domainId: string, label: string, 
             .update(registryDatabase, {id:registryRecord.id})
             .set({...registryRecord, label: label});
     }
-
+    let name = label;
+    if (source != "RootRegistry") {
+        const parentRegistryRecord = await context.db.sql.query
+            .registryDatabase
+            .findFirst({where: eq(registryDatabase.subregistryId, registryRecord.id)});
+    
+        if (parentRegistryRecord) {
+            console.log("Parent registry record found:", parentRegistryRecord);
+            let parentDomainRecord = await context.db.sql.query.domain.findFirst({where: eq(domain.registry, parentRegistryRecord.id)});
+            if (parentDomainRecord) {
+                console.log("Parent domain record found:", parentDomainRecord);
+                const parentLabel = parentDomainRecord.label;
+                name = name + "." + parentLabel;
+                console.log("New name:", name);
+            }
+        }
+    }
     // Update the domain record
     const newDomainRecord = {
         ...domainRecord,
         label: label,
+        name: name,
         labelHash: tokenId,
         isTld: source === "RootRegistry" ? true : false,
         updatedAt: timestamp
