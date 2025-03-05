@@ -1,5 +1,5 @@
 import { ponder } from "ponder:registry";
-import { domain, ownedResolver, registryDatabase, subregistryUpdateEvent } from "ponder:schema";
+import { domain, ownedResolver, registryDatabase, subregistryUpdateEvent, resolverUpdateEvent, newSubnameEvent } from "ponder:schema";
 import { ethers, id } from "ethers";
 import { db } from "ponder:api";
 import { eq } from "ponder";
@@ -29,7 +29,7 @@ function createDomainId(registryId: string | undefined, tokenId: string): string
     return `${registryId}-${tokenId}`;
 }
 
-async function updateDomainLabel(context: any, domainId: string, label: string, tokenId: string, timestamp: bigint) {
+async function updateDomainLabel(context: any, domainId: string, label: string, tokenId: string, timestamp: bigint, event: any, source: string) {
     const record = await context.db.find(domain, { id: domainId });
     if (!record) {
         console.log("Domain not found:", domainId);
@@ -62,6 +62,18 @@ async function updateDomainLabel(context: any, domainId: string, label: string, 
     await context.db
         .update(domain, {id: domainId})
         .set(newRecord);
+    
+    // Store the event data
+    const eventId = createEventID(event);
+    await context.db.insert(newSubnameEvent).values({
+        id: eventId,
+        registryId: record.registry,
+        label: label,
+        labelHash: tokenId,
+        source: source,
+        createdAt: timestamp,
+        updatedAt: timestamp
+    });
     
     console.log("Domain updated:", domainId);
 }
@@ -113,6 +125,18 @@ ponder.on("RegistryDatastore:ResolverUpdate", async ({ event, context }) => {
     } else {
         console.log("RegistryDatastore:ResolverUpdate", "No record found");
     }
+    
+    // Store the event data
+    const eventId = createEventID(event);
+    await context.db.insert(resolverUpdateEvent).values({
+      id: eventId,
+      registryId: event.args.registry.toString(),
+      labelHash: event.args.labelHash.toString(),
+      resolverId: event.args.resolver.toString(),
+      flags: event.args.flags,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    });
 });
 
 // ETH Registry handlers
@@ -138,7 +162,7 @@ ponder.on("EthRegistry:NewSubname", async ({ event, context }) => {
     const registryId = event.transaction.to?.toString();
     const domainId = createDomainId(registryId, tokenId);
     
-    await updateDomainLabel(context, domainId, event.args.label, tokenId, event.block.timestamp);
+    await updateDomainLabel(context, domainId, event.args.label, tokenId, event.block.timestamp, event, "EthRegistry");
 });
 
 // Root Registry handlers
@@ -166,7 +190,7 @@ ponder.on("RootRegistry:NewSubname", async ({ event, context }) => {
     const registryId = event.transaction.to?.toString();
     const domainId = createDomainId(registryId, tokenId);
     
-    await updateDomainLabel(context, domainId, event.args.label, tokenId, event.block.timestamp);
+    await updateDomainLabel(context, domainId, event.args.label, tokenId, event.block.timestamp, event, "RootRegistry");
 });
 
 // Resolver handlers

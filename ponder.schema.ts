@@ -38,6 +38,26 @@ export const subregistryUpdateEvent = onchainTable("subregistryUpdateEvent", (t)
   updatedAt: t.bigint("updatedAt").notNull(),
 }));
 
+export const resolverUpdateEvent = onchainTable("resolverUpdateEvent", (t) => ({
+  id: t.text().primaryKey(),
+  registryId: t.text(),
+  labelHash: t.text(),
+  resolverId: t.text(),
+  flags: t.bigint(),
+  createdAt: t.bigint("createdAt").notNull(),
+  updatedAt: t.bigint("updatedAt").notNull(),
+}));
+
+export const newSubnameEvent = onchainTable("newSubnameEvent", (t) => ({
+  id: t.text().primaryKey(),
+  registryId: t.text(),
+  label: t.text(),
+  labelHash: t.text(),
+  source: t.text(), // "EthRegistry" or "RootRegistry"
+  createdAt: t.bigint("createdAt").notNull(),
+  updatedAt: t.bigint("updatedAt").notNull(),
+}));
+
 export const registryDatabaseRelations = relations(registryDatabase, ({ one }) => ({
   subregistry: one(registryDatabase, {
     fields: [registryDatabase.subregistryId],
