@@ -89,7 +89,7 @@ async function updateDomainLabel(context: any, domainId: string, label: string, 
         name = currentName;
     }
     // Update the domain record
-    const nameArray = [name];
+    const nameArray = domainRecord.name ? [...domainRecord.name, name] : [name];
     const newDomainRecord = {
         ...domainRecord,
         label: label,
