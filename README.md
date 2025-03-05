@@ -16,6 +16,18 @@ This is a Ponder project for the ENS. It is a simple inder that stores the ENS r
    - `registryDatabase.resolver` references `ownedResolver.id`
    - Each registry entry can have an associated resolver
 
+
+## Difference between V1 (current ENS contracts on L1) and V2 (On namechain, L1, and other L2s)
+
+V1:
+- Only has 1 registry
+- Shared resolver (eg: DefaultResolver)
+
+V2:
+- Has multiple registries (eg: EthRegistry, RootRegistry, etc.)
+- Registries are hierarchical
+- Each user deploy own resolver (eg: OwnedResolver)
+
 ## Schema
 
 ```mermaid
@@ -32,7 +44,7 @@ erDiagram
         bigint updatedAt
     }
 
-    registryDatabase {
+    registry {
         string id PK
         string labelHash
         string label
@@ -93,13 +105,13 @@ erDiagram
         bigint updatedAt
     }
 
-    domain ||--|{ registryDatabase : "registry"
-    registryDatabase ||--|{ registryDatabase : "subregistry"
-    registryDatabase ||--|{ ownedResolver : "resolver"
-    subregistryUpdateEvent }|--|| registryDatabase : "registry"
-    resolverUpdateEvent }|--|| registryDatabase : "registry"
-    newSubnameEvent }|--|| registryDatabase : "registry"
-    transferSingleEvent }|--|| registryDatabase : "registry"
+    domain ||--|{ registry : "registry"
+    registry ||--|{ registry : "subregistry"
+    registry ||--|{ ownedResolver : "resolver"
+    subregistryUpdateEvent }|--|| registry : "registry"
+    resolverUpdateEvent }|--|| registry : "registry"
+    newSubnameEvent }|--|| registry : "registry"
+    transferSingleEvent }|--|| registry : "registry"
 
 
 ```
