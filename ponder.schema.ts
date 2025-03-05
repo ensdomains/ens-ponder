@@ -3,6 +3,7 @@ import { onchainTable, relations } from "ponder";
 export const domain = onchainTable("domain", (t) => ({
   id: t.text().primaryKey(),
   label: t.text(),
+  name: t.text().array(), // Will store serialized array as JSON string
   labelHash: t.text(),
   owner: t.text(),
   registry: t.text(),

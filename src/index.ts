@@ -68,10 +68,12 @@ async function updateDomainLabel(context: any, domainId: string, label: string, 
         }
     }
     // Update the domain record
+    const nameArray = [name];
+    const serializedName = JSON.stringify(nameArray);
     const newDomainRecord = {
         ...domainRecord,
         label: label,
-        name: name,
+        name: nameArray,
         labelHash: tokenId,
         isTld: source === "RootRegistry" ? true : false,
         updatedAt: timestamp
