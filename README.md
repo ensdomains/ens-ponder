@@ -89,3 +89,11 @@ cd ens-ponder
 pnpm install
 pnpm dev
 ```
+
+## Todo
+
+- Make sure it works when multiple tlds are used
+- Make sure it works when a registry is the subregistry of another registry
+- Add Support for UserRegistries
+- Add Support for different resolver record (currently only supports ETH address)
+- (Potentially) Turn it into Plugin so that it can be used in other projects
