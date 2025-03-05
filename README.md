@@ -25,8 +25,8 @@ V1:
 
 V2:
 - Has multiple registries (eg: EthRegistry, RootRegistry, etc.)
-- Registries are hierarchical
-- Each user deploy own resolver (eg: OwnedResolver)
+- Registries are hierarchical via subregistryId
+- Each user deploys own resolver (eg: OwnedResolver) using [verifiable factory](https://github.com/ensdomains/verifiable-factory)
 
 ## Schema
 
@@ -170,8 +170,9 @@ erDiagram
 
 Domain IDs are generated as composite keys:
 - Format: `${registryAddress}-${labelHash}`
-- Ensures unique identification across different registries
-- Maintains relationship between domains and their registries
+
+Event IDs are generated as composite keys:
+- Format: `${event.block.number}-${event.logIndex}`
 
 ## Notes
 
@@ -194,6 +195,7 @@ pnpm dev
 
 - Make sure it works when multiple tlds are used
 - Make sure it works when a registry is the subregistry of another registry
-- Add Support for UserRegistries
 - Add Support for different resolver record (currently only supports ETH address)
-- (Potentially) Turn it into Plugin so that it can be used in other projects
+- Add Support for UserRegistries (contract not ready yet)
+- Support for name migration from L1 to L2 (contract not ready yet)
+- Support for name bridging from L2 to L1 (contract not ready yet)
