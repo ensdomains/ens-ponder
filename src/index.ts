@@ -56,6 +56,7 @@ async function updateDomainLabel(context: any, domainId: string, label: string, 
         ...record,
         label: label,
         labelHash: tokenId,
+        isTld: source === "RootRegistry" ? true : false,
         updatedAt: timestamp
     };
     
