@@ -67,7 +67,7 @@ export const registryRelations = relations(registry, ({ one }) => ({
   }),
 }));
 
-export const ownedResolver = onchainTable("ownedResolver", (t) => ({
+export const resolver = onchainTable("resolver", (t) => ({
   id: t.text().primaryKey(),
   address: t.text(),
   node: t.text(),
@@ -76,9 +76,9 @@ export const ownedResolver = onchainTable("ownedResolver", (t) => ({
 }));
 
 export const registryResolverRelations = relations(registry, ({ one }) => ({
-  resolver: one(ownedResolver, {
+  resolver: one(resolver, {
     fields: [registry.resolver],
-    references: [ownedResolver.id],
+    references: [resolver.id],
   }),
 }));
 

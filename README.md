@@ -5,15 +5,15 @@ This is a Ponder project for the ENS. It is a simple inder that stores the ENS r
 ## Relations
 
 1. Domain → Registry:
-   - `domain.registry` references `registryDatabase.id`
+   - `domain.registry` references `registry.id`
    - Each domain belongs to one registry
 
 2. Registry → Subregistry:
-   - `registryDatabase.subregistryId` references `registryDatabase.id`
+   - `registry.subregistryId` references `registry.id`
    - Registries can have subregistries (hierarchical structure)
 
 3. Registry → Resolver:
-   - `registryDatabase.resolver` references `ownedResolver.id`
+   - `registry.resolver` references `resolver.id`
    - Each registry entry can have an associated resolver
 
 
@@ -85,7 +85,7 @@ erDiagram
         bigint updatedAt
     }
 
-    ownedResolver {
+    resolver {
         string id PK
         string address
         string node
@@ -107,7 +107,7 @@ erDiagram
 
     domain ||--|{ registry : "registry"
     registry ||--|{ registry : "subregistry"
-    registry ||--|{ ownedResolver : "resolver"
+    registry ||--|{ resolver : "resolver"
     subregistryUpdateEvent }|--|| registry : "registry"
     resolverUpdateEvent }|--|| registry : "registry"
     newSubnameEvent }|--|| registry : "registry"

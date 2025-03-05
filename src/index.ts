@@ -1,5 +1,5 @@
 import { ponder } from "ponder:registry";
-import { domain, ownedResolver, registry, subregistryUpdateEvent, resolverUpdateEvent, newSubnameEvent, transferSingleEvent } from "ponder:schema";
+import { domain, resolver, registry, subregistryUpdateEvent, resolverUpdateEvent, newSubnameEvent, transferSingleEvent } from "ponder:schema";
 import { ethers, id } from "ethers";
 import { db } from "ponder:api";
 import { eq } from "ponder";
@@ -153,10 +153,10 @@ ponder.on("RegistryDatastore:ResolverUpdate", async ({ event, context }) => {
         .update(registry, {id:record2.id})
         .set({...record2, resolver: event.args.resolver.toString()})
 
-        const record3 = await context.db.find(ownedResolver, {id: event.args.resolver.toString()});
+        const record3 = await context.db.find(resolver, {id: event.args.resolver.toString()});
         if (!record3) {
             console.log("RegistryDatastore:ResolverUpdate", "Creating new resolver record");
-            await context.db.insert(ownedResolver).values({
+            await context.db.insert(resolver).values({
                 id: event.args.resolver.toString(),
                 createdAt: timestamp,
                 updatedAt: timestamp
@@ -266,11 +266,11 @@ ponder.on("OwnedResolver:AddressChanged", async ({ event, context }) => {
     const timestamp = event.block.timestamp
     const resolverId = event.transaction.to?.toString()
     console.log("OwnedResolver:AddressChanged", event.args, resolverId);
-    const record = await context.db.find(ownedResolver, {id: resolverId});
+    const record = await context.db.find(resolver, {id: resolverId});
     if (record) {
         console.log("OwnedResolver:AddressChanged", "Record found", record);
         await context.db
-            .update(ownedResolver, {id:record.id})
+            .update(resolver, {id:record.id})
             .set({
                 ...record,
                 address: event.args.newAddress.toString(),
