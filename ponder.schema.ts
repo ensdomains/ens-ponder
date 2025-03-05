@@ -79,3 +79,15 @@ export const registryDatabaseResolverRelations = relations(registryDatabase, ({ 
     references: [ownedResolver.id],
   }),
 }));
+
+export const transferSingleEvent = onchainTable("transferSingleEvent", (t) => ({
+  id: t.text().primaryKey(),
+  registryId: t.text(),
+  tokenId: t.text(),
+  from: t.text(),
+  to: t.text(),
+  value: t.bigint(),
+  source: t.text(), // "EthRegistry" or "RootRegistry"
+  createdAt: t.bigint("createdAt").notNull(),
+  updatedAt: t.bigint("updatedAt").notNull(),
+}));

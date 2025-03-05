@@ -1,5 +1,5 @@
 import { ponder } from "ponder:registry";
-import { domain, ownedResolver, registryDatabase, subregistryUpdateEvent, resolverUpdateEvent, newSubnameEvent } from "ponder:schema";
+import { domain, ownedResolver, registryDatabase, subregistryUpdateEvent, resolverUpdateEvent, newSubnameEvent, transferSingleEvent } from "ponder:schema";
 import { ethers, id } from "ethers";
 import { db } from "ponder:api";
 import { eq } from "ponder";
@@ -154,6 +154,20 @@ ponder.on("EthRegistry:TransferSingle", async ({ event, context }) => {
       createdAt: timestamp,
       updatedAt: timestamp
     });
+    
+    // Store the event data
+    const eventId = createEventID(event);
+    await context.db.insert(transferSingleEvent).values({
+      id: eventId,
+      registryId: event.transaction.to?.toString(),
+      tokenId: event.args.id.toString(),
+      from: event.args.from.toString(),
+      to: event.args.to.toString(),
+      value: event.args.value,
+      source: "EthRegistry",
+      createdAt: timestamp,
+      updatedAt: timestamp
+    });
 });
 
 ponder.on("EthRegistry:NewSubname", async ({ event, context }) => {
@@ -182,6 +196,20 @@ ponder.on("RootRegistry:TransferSingle", async ({ event, context }) => {
     }
     console.log("RootRegistry:TransferSingle", values);
     await context.db.insert(domain).values(values);
+    
+    // Store the event data
+    const eventId = createEventID(event);
+    await context.db.insert(transferSingleEvent).values({
+      id: eventId,
+      registryId: registryId,
+      tokenId: tokenId,
+      from: event.args.from.toString(),
+      to: event.args.to.toString(),
+      value: event.args.value,
+      source: "RootRegistry",
+      createdAt: timestamp,
+      updatedAt: timestamp
+    });
 });
 
 ponder.on("RootRegistry:NewSubname", async ({ event, context }) => {
