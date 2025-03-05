@@ -28,6 +28,16 @@ export const registryDatabase = onchainTable("registryDatabase", (t) => ({
   updatedAt: t.bigint("updatedAt").notNull(),
 }));
 
+export const subregistryUpdateEvent = onchainTable("subregistryUpdateEvent", (t) => ({
+  id: t.text().primaryKey(),
+  registryId: t.text(),
+  labelHash: t.text(),
+  subregistryId: t.text(),
+  flags: t.bigint(),
+  createdAt: t.bigint("createdAt").notNull(),
+  updatedAt: t.bigint("updatedAt").notNull(),
+}));
+
 export const registryDatabaseRelations = relations(registryDatabase, ({ one }) => ({
   subregistry: one(registryDatabase, {
     fields: [registryDatabase.subregistryId],

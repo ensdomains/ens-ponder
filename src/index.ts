@@ -1,5 +1,5 @@
 import { ponder } from "ponder:registry";
-import { domain, ownedResolver, registryDatabase } from "ponder:schema";
+import { domain, ownedResolver, registryDatabase, subregistryUpdateEvent } from "ponder:schema";
 import { ethers, id } from "ethers";
 import { db } from "ponder:api";
 import { eq } from "ponder";
@@ -8,6 +8,12 @@ import { eq } from "ponder";
 const LABEL_HASH_MASK = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000n;
 
 // Utility functions
+function createEventID(event: any): string {
+    return event.block.number
+      .toString()
+      .concat("-")
+      .concat(event.log.logIndex);
+  }
 function generateTokenId(label: string): string {
     const hash = ethers.keccak256(ethers.toUtf8Bytes(label));
     
@@ -66,6 +72,17 @@ ponder.on("RegistryDatastore:SubregistryUpdate", async ({ event, context }) => {
     const timestamp = event.block.timestamp
     await context.db.insert(registryDatabase).values({
       id: event.args.registry.toString(),
+      labelHash: event.args.labelHash.toString(),
+      subregistryId: event.args.subregistry,
+      flags: event.args.flags,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    });
+    console.log(event);
+    const eventId = createEventID(event);
+    await context.db.insert(subregistryUpdateEvent).values({
+      id: eventId,
+      registryId: event.args.registry.toString(),
       labelHash: event.args.labelHash.toString(),
       subregistryId: event.args.subregistry,
       flags: event.args.flags,
