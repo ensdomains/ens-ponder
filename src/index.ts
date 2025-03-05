@@ -1,5 +1,5 @@
 import { ponder } from "ponder:registry";
-import { domain, ownedResolver, registryDatabase, subregistryUpdateEvent, resolverUpdateEvent, newSubnameEvent, transferSingleEvent } from "ponder:schema";
+import { domain, ownedResolver, registry, subregistryUpdateEvent, resolverUpdateEvent, newSubnameEvent, transferSingleEvent } from "ponder:schema";
 import { ethers, id } from "ethers";
 import { db } from "ponder:api";
 import { eq } from "ponder";
@@ -41,13 +41,13 @@ async function updateDomainLabel(context: any, domainId: string, label: string, 
     // Update registry database if exists
     const labelHash = BigInt(tokenId) & LABEL_HASH_MASK;
     const registryRecord = await context.db.sql.query
-        .registryDatabase
-        .findFirst({where: eq(registryDatabase.labelHash, labelHash.toString())});
+        .registry
+        .findFirst({where: eq(registry.labelHash, labelHash.toString())});
 
     if (registryRecord) {
         console.log("Registry record found:", registryRecord);
         await context.db
-            .update(registryDatabase, {id:registryRecord.id})
+            .update(registry, {id:registryRecord.id})
             .set({...registryRecord, label: label});
     }
     let name = label;
@@ -57,8 +57,8 @@ async function updateDomainLabel(context: any, domainId: string, label: string, 
 
         while (true) {
             const parentRegistryRecord = await context.db.sql.query
-                .registryDatabase
-                .findFirst({where: eq(registryDatabase.subregistryId, currentRegistryId)});
+                .registry
+                .findFirst({where: eq(registry.subregistryId, currentRegistryId)});
 
             if (!parentRegistryRecord) {
                 break; // We've reached the top level
@@ -122,7 +122,7 @@ async function updateDomainLabel(context: any, domainId: string, label: string, 
 ponder.on("RegistryDatastore:SubregistryUpdate", async ({ event, context }) => {
     console.log("RegistryDatastore:SubregistryUpdate", event.args);
     const timestamp = event.block.timestamp
-    await context.db.insert(registryDatabase).values({
+    await context.db.insert(registry).values({
       id: event.args.registry.toString(),
       labelHash: event.args.labelHash.toString(),
       subregistryId: event.args.subregistry,
@@ -146,11 +146,11 @@ ponder.on("RegistryDatastore:SubregistryUpdate", async ({ event, context }) => {
 ponder.on("RegistryDatastore:ResolverUpdate", async ({ event, context }) => {
     console.log("RegistryDatastore:ResolverUpdate", event.args);
     const timestamp = event.block.timestamp
-    const record2 = await context.db.find(registryDatabase, {id: event.args.registry.toString()});
+    const record2 = await context.db.find(registry, {id: event.args.registry.toString()});
     if (record2) {
         console.log("RegistryDatastore:ResolverUpdate", "Record found", record2);
         await context.db
-        .update(registryDatabase, {id:record2.id})
+        .update(registry, {id:record2.id})
         .set({...record2, resolver: event.args.resolver.toString()})
 
         const record3 = await context.db.find(ownedResolver, {id: event.args.resolver.toString()});

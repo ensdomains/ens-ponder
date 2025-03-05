@@ -13,13 +13,13 @@ export const domain = onchainTable("domain", (t) => ({
 }));
 
 export const domainRelations = relations(domain, ({ one }) => ({
-  registry: one(registryDatabase, {
+  registry: one(registry, {
     fields: [domain.registry],
-    references: [registryDatabase.id],
+    references: [registry.id],
   }),
 }));
 
-export const registryDatabase = onchainTable("registryDatabase", (t) => ({
+export const registry = onchainTable("registry", (t) => ({
   id: t.text().primaryKey(),
   labelHash: t.text(),
   label: t.text(),
@@ -60,10 +60,10 @@ export const newSubnameEvent = onchainTable("newSubnameEvent", (t) => ({
   updatedAt: t.bigint("updatedAt").notNull(),
 }));
 
-export const registryDatabaseRelations = relations(registryDatabase, ({ one }) => ({
-  subregistry: one(registryDatabase, {
-    fields: [registryDatabase.subregistryId],
-    references: [registryDatabase.id],
+export const registryRelations = relations(registry, ({ one }) => ({
+  subregistry: one(registry, {
+    fields: [registry.subregistryId],
+    references: [registry.id],
   }),
 }));
 
@@ -75,9 +75,9 @@ export const ownedResolver = onchainTable("ownedResolver", (t) => ({
   updatedAt: t.bigint("updatedAt").notNull(),
 }));
 
-export const registryDatabaseResolverRelations = relations(registryDatabase, ({ one }) => ({
+export const registryResolverRelations = relations(registry, ({ one }) => ({
   resolver: one(ownedResolver, {
-    fields: [registryDatabase.resolver],
+    fields: [registry.resolver],
     references: [ownedResolver.id],
   }),
 }));
